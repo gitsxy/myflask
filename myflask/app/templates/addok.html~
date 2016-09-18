@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}Flasky{% endblock %}
+{% block page_content %}
+
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+
+<title>添加成功</title>
+
+</head>
+
+<body>
+
+	<form name=loading> 
+	<h2 align=center>添加成功</h2>
+	　<p align=center>正在跳转，请稍等...	</p> 
+          <p>
+	　　<input type=text name=chart size=46 style="font-family:Arial; font-weight:bolder; color:#0066ff; background-color:#fef4d9; padding:0px; border-style:none;"> 
+	　　<input type=text name=percent size=47 style="color:#0066ff; text-align:center; border-width:medium; border-style:none;"> 
+	<script>　 
+		var bar=0　 
+		var line="||"　 
+		var amount="||"　 
+
+		count()　 
+		function count(){　 
+			bar=bar+2　 
+			amount =amount + line　 
+			document.loading.chart.value=amount　 
+			document.loading.percent.value=bar+"%"　 
+			if (bar<99)　 
+			{setTimeout("count()",100);}　 
+			else　 
+			{window.location = "{{ url_for('.index') }}";}　 
+		}
+	</script> 
+</p> 
+
+
+	</form> 
+
+	<p align="center">如果您的浏览器不支持跳转,<a style="text-decoration: none" href="{{ url_for('.index') }}"><font color="#FF0000">请点这里</font></a>.
+	</p>
+
+</body>
+
+{% endblock %}

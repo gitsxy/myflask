@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}添加投票{% endblock %}
+{% block page_content %}
+
+<meta charset=UTF-8>
+<title>添加投票</title>
+
+<script type="text/javascript">
+    var op_cnt = 2
+
+    function add(){ 
+        var TemO=document.getElementById("pic_load_form"); 
+        var newInput = document.createElement("input");  
+
+        newInput.setAttribute("type","text");
+        newInput.setAttribute("name","option"+op_cnt);
+        newInput.setAttribute("id","option"+op_cnt);
+        newInput.setAttribute("placeholder","选项"+(op_cnt+1));
+        newInput.setAttribute("class","form-control");
+        TemO.appendChild(newInput); 
+ 
+        op_cnt ++;
+        b2.disabled = false;
+        if (op_cnt >= 10){ 
+            b1.disabled = 'disabled';
+        }
+    } 
+
+    function del() { 
+        if(op_cnt==2){
+            b2.disabled = 'disabled';
+            return;
+        }      
+        op_cnt--;   
+        document.getElementById("option"+op_cnt).parentNode.removeChild(document.getElementById("option"+op_cnt));  
+        b1.disabled = false
+        if(op_cnt==2){
+            b2.disabled = 'disabled';
+        }  
+    }  
+
+    function fsubmit(obj){
+        var x=document.getElementById("pic_load_form");
+        for (var i=0;i<x.length;i++){
+            if((i!=1) && x.elements[i].value==''){
+                alert("除了正文，其他均需要填写！");
+                return;
+            }   
+        }
+        for (var i=4;i<x.length;i++){
+            for (var j=4; j<i; j++){
+                if(x.elements[j].value==x.elements[i].value){
+                    alert("选项不能相同");
+                    return;
+                }
+                    
+            }
+        }
+        obj.submit();
+    }
+</script>
+
+<div align="center">
+    <div>
+        <h2>请填写内容</h2>
+    </div>
+    <p>  
+        <form role="form"  id="pic_load_form" name="pic_load_form" action="add_item"  runat="server" method="post" enctype="multipart/form-data"> 
+            <input type="text" class="form-control" id="subject" name="subject" placeholder="请输入标题">
+            <textarea class="form-control" id="introduction" name="introduction" rows="4" placeholder="请输入正文"></textarea>
+            <input type="radio" class="form-control" name="optionsRadios" id="optionRaido2" checked="checked" required="required" value="single"/>单选<br/>
+            <input type="radio" class="form-control" name="optionsRadios" id="optionRaido1" required="required" value="multi"/>多选
+            <input type="text" class="form-control" id="option0" name="option0"  required="required" requiredErrorText="please input description！" placeholder="选项1">
+            <input type="text" class="form-control" id="option1" name="option1"  required="required" requiredErrorText="please input description！" placeholder="选项2">
+
+        </form>
+    </p>
+    <p>
+        <button type="button" class="btn btn-default" id="b1" name="b1" onclick="javascript:AddElement();">增加选项+</button>
+        <button type="button" class="btn btn-default" id="b2" name="b2" disabled="true"  onclick="javascript:del();">减少选项-</button><br/>
+    </p>
+    <button type="button" class="btn btn-primary btn-lg btn-block" value="submit"  onClick="javascript:fsubmit(document.pic_load_form);">点此提交</button>
+</div>
+
+{% endblock %}

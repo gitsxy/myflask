@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}主页{% endblock %}
+
+{% block page_content %}
+<form role="form" class="form-horizontal" id="idx" name="idx" action="."  method="post" enctype="multipart/form-data"> 
+<div class="page-header">
+    <h1>
+    	<div align="center">
+        <p>{% if current_user.is_authenticated %}欢迎,{{ current_user.username }}</p>
+	<button type="submit" class="btn btn-primary btn-lg btn-block">添加投票</button> 
+        {% else %}<p>欢迎, 游客</p>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">去登录</button>
+        {% endif %}	
+        </div>
+    </h1>
+    
+</div>
+</form>
+
+<div class="item-tabs">
+
+{% include '_item.html' %}
+
+</div>
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.index') }}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}

@@ -1,0 +1,40 @@
+<ul class="items">
+    {% for item in items %}
+    <li class="item">
+        <div class="item-thumbnail">
+            <a href="{{ url_for('.user', username=item.author.username) }}">
+                <img class="img-rounded profile-thumbnail" height="35" width="35" src="{{ url_for('static', filename='123456.jpg') }}">
+            </a>
+        </div>
+        <div class="item-content">
+            <div class="item-date">{{ moment(item.timestamp).fromNow() }}</div>
+            <div class="item-author"><a href="{{ url_for('.user', username=item.author.username) }}">{{ item.author.username }}</a></div>
+            <div class="item-subject">
+                <h4>
+                <a href="{{ url_for('.item', id=item.id) }}">
+                    {{ item.subject }}
+                </a>
+                    
+                <h4>
+            </div>
+            <div class="item-body">
+                {% if item.body_html %}
+                    {{ item.body_html | safe }}
+                {% else %}
+                    {{ item.body }}
+                {% endif %}
+            </div>
+            <div class="item-footer">
+                {% if current_user == item.author %}
+                <a href="{{ url_for('.del_item', id=item.id) }}">
+                    <span class="label label-primary">delete</span>
+                </a>
+                {% endif %}
+                <a href="{{ url_for('.item', id=item.id) }}#comments">
+                    <span class="label label-primary">{{ item.comments.count() }}个评论</span>
+                </a>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
