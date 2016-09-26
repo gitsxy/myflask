@@ -3,7 +3,11 @@
     <li class="item">
         <div class="item-thumbnail">
             <a href="{{ url_for('.user', username=item.author.username) }}">
-                <img class="img-rounded profile-thumbnail" height="35" width="35" src="{{ url_for('static', filename='123456.jpg') }}">
+            {% if item.author.avatared %}
+            <img class="img-rounded profile-thumbnail" height="35" width="35" src="{{ url_for('static', filename=item.author.id) }}">
+            {% else %}
+            <img class="img-rounded profile-thumbnail" height="35" width="35" src="{{ url_for('static', filename='default_avat.jpg') }}">
+            {% endif %}   
             </a>
         </div>
         <div class="item-content">

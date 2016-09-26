@@ -85,18 +85,22 @@ def user(username):
 @main.route('/edit-profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
-    form = EditProfileForm()
-    if form.validate_on_submit():
-        current_user.name = form.name.data
-        current_user.signature = form.signature.data
-        current_user.about_me = form.about_me.data
+    if request.method == 'POST':
+        if request.form.get('name') != '':
+            current_user.name = request.form.get('name')
+        if request.form.get('signature') != '':
+            current_user.signature = request.form.get('signature')
+        if request.form.get('about_me') != '':
+            current_user.about_me = request.form.get('about_me')
+        imgfile = request.files.get('inputfile')
+        if imgfile.filename != '':
+            imgfile.save('app/static/'+str(current_user.id))
+            current_user.avatared = True
         db.session.add(current_user)
-        flash(u'您的资料已更新！')
+        flash('edit ok-%s'%(imgfile.filename))
         return redirect(url_for('.user', username=current_user.username))
-    form.name.data = current_user.name
-    form.signature.data = current_user.signature
-    form.about_me.data = current_user.about_me
-    return render_template('edit_profile.html', form=form)
+    flash('sagsag')
+    return render_template('edit_profile.html')
 
 
 @main.route('/edit-profile/<int:id>', methods=['GET', 'POST'])

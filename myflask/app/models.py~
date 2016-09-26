@@ -67,12 +67,12 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=True)
+    avatared = db.Column(db.Boolean, default=False)
     name = db.Column(db.String(64))
     signature = db.Column(db.String(64))
     about_me = db.Column(db.Text())
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
-    #avatar_hash = db.Column(db.String(32))
     items = db.relationship('Item', backref='author', lazy='dynamic')
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
     voted = db.relationship('Ballot',
@@ -81,35 +81,6 @@ class User(UserMixin, db.Model):
                                lazy='dynamic',
                                cascade='all, delete-orphan')
 
-#    @staticmethod
-#    def generate_fake(count=100):
-#        from sqlalchemy.exc import IntegrityError
-#        from random import seed
-#        import forgery_py
-#
-#        seed()
-#        for i in range(count):
-#            u = User(email=forgery_py.internet.email_address(),
-#                     username=forgery_py.internet.user_name(True),
-#                     password=forgery_py.lorem_ipsum.word(),
-#                     confirmed=True,
-#                     name=forgery_py.name.full_name(),
-#                     location=forgery_py.address.city(),
-#                     about_me=forgery_py.lorem_ipsum.sentence(),
-#                     member_since=forgery_py.date.date(True))
-#            db.session.add(u)
-#            try:
-#                db.session.commit()
-#            except IntegrityError:
-#                db.session.rollback()
-#
-#    @staticmethod
-#    def add_self_follows():
-#        for user in User.query.all():
-#            if not user.is_following(user):
-#                user.follow(user)
-#                db.session.add(user)
-#                db.session.commit()
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -118,9 +89,6 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(permissions=0xff).first()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
-#        if self.email is not None and self.avatar_hash is None:
-#            self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
-#        self.followed.append(Follow(followed=self))
 
     @property
     def password(self):
@@ -183,7 +151,6 @@ class User(UserMixin, db.Model):
         if self.query.filter_by(email=new_email).first() is not None:
             return False
         self.email = new_email
-#        self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
         db.session.add(self)
         return True
 
@@ -205,15 +172,6 @@ class User(UserMixin, db.Model):
     def has_voted(self, item):
         return self.voted.filter_by(item=item).first() is not None
 
-#    def gravatar(self, size=100, default='identicon', rating='g'):
-#        if request.is_secure:
-#            url = 'https://secure.gravatar.com/avatar'
-#        else:
-#            url = 'http://www.gravatar.com/avatar'
-#        hash = self.avatar_hash or hashlib.md5(
-#            self.email.encode('utf-8')).hexdigest()
-#        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
-#            url=url, hash=hash, size=size, default=default, rating=rating)
 #
 #    def follow(self, user):
 #        if not self.is_following(user):
@@ -234,8 +192,8 @@ class User(UserMixin, db.Model):
 #            follower_id=user.id).first() is not None
 #
 #    @property
-#    def followed_posts(self):
-#        return Post.query.join(Follow, Follow.followed_id == Post.author_id)\
+#    def followed_items(self):
+#        return Item.query.join(Follow, Follow.followed_id == Item.author_id)\
 #            .filter(Follow.follower_id == self.id)
 
     def to_json(self):
@@ -245,7 +203,7 @@ class User(UserMixin, db.Model):
             'member_since': self.member_since,
             'last_seen': self.last_seen,
             'items': url_for('api.get_user_items', id=self.id, _external=True),
-#            'followed_posts': url_for('api.get_user_followed_posts',id=self.id, _external=True),
+#            'followed_items': url_for('api.get_user_followed_items',id=self.id, _external=True),
             'post_count': self.posts.count()
         }
         return json_user
@@ -282,60 +240,6 @@ login_manager.anonymous_user = AnonymousUser
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
-#class Post(db.Model):
-#    __tablename__ = 'posts'
-#    id = db.Column(db.Integer, primary_key=True)
-#    body = db.Column(db.Text)
-#    body_html = db.Column(db.Text)
-#    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-#    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-#    comments = db.relationship('Comment', backref='post', lazy='dynamic')
-#
-#    @staticmethod
-#    def generate_fake(count=100):
-#        from random import seed, randint
-#        import forgery_py
-#
-#        seed()
-#        user_count = User.query.count()
-#        for i in range(count):
-#            u = User.query.offset(randint(0, user_count - 1)).first()
-#            p = Post(body=forgery_py.lorem_ipsum.sentences(randint(1, 5)),
-#                     timestamp=forgery_py.date.date(True),
-#                     author=u)
-#            db.session.add(p)
-#            db.session.commit()
-#
-#    @staticmethod
-#    def on_changed_body(target, value, oldvalue, initiator):
-#        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
-#                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
-#                        'h1', 'h2', 'h3', 'p']
-#        target.body_html = bleach.linkify(bleach.clean(
-#            markdown(value, output_format='html'),
-#            tags=allowed_tags, strip=True))
-#
-#    def to_json(self):
-#        json_post = {
-#            'url': url_for('api.get_post', id=self.id, _external=True),
-#            'body': self.body,
-#            'body_html': self.body_html,
-#            'timestamp': self.timestamp,
-#            'author': url_for('api.get_user', id=self.author_id,
-#                              _external=True),
-#            'comments': url_for('api.get_post_comments', id=self.id,
-#                                _external=True),
-#            'comment_count': self.comments.count()
-#        }
-#        return json_post
-
-#    @staticmethod
-#    def from_json(jsofollowingn_post):
-#        body = json_post.get('body')
-#        if body is None or body == '':
-#            raise ValidationError('post does not have a body')
-#       return Post(body=body)
 
 class Item(db.Model):
     __tablename__ = 'items'
@@ -379,7 +283,7 @@ class Item(db.Model):
                               _external=True),
             'comments': url_for('api.get_item_comments', id=self.id,
                                 _external=True),
-            'comments_count': self.comments.count()
+            'comments_count': self.comments.count(),
             'options': url_for('api.get_item_options', id=self.id,
                                 _external=True),
             'options_count': self.options.count()
@@ -400,7 +304,7 @@ class Option(db.Model):
     __tablename__ = 'options'
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(32))
-    vote = db.Column(db.Integer)
+    vote = db.Column(db.Integer,default=0)
     link = db.Column(db.Text)
     item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
 

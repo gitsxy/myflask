@@ -8,6 +8,13 @@
     <h1>编辑个人资料</h1>
 </div>
 <div class="col-md-4">
-    {{ wtf.quick_form(form) }}
+   
+    <form role="form"  id="edit_profile_form" name="edit_profile_form" action="edit-profile"  runat="server" method="post"  enctype="multipart/form-data"> 
+    	    <input type="text" class="form-control" id="subject" name="name" placeholder="name">
+            <input type="text" class="form-control" id="option0" name="signature"  placeholder="signature">
+            <textarea class="form-control" id="introduction" name="about_me" rows="4" placeholder="about_me"></textarea>
+            <label for="inputfile">上传头像图片</label> <input type="file"  class="form-control" name="inputfile" id="inputfile" accept="image/*">
+            <button type="submit" class="btn btn-default">提交</button>
+    </form>
 </div>
 {% endblock %}
